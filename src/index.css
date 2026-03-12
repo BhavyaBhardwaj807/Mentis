@@ -1,0 +1,44 @@
+:root {
+  --primary: #000000;
+  --secondary: #4b5563;
+  --bg-creme: #f5f5dc;
+  /* Beige/Cream */
+  --text-main: #000000;
+  --border-subtle: rgba(0, 0, 0, 0.1);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  margin: 0;
+  font-family: 'Instrument Sans', sans-serif;
+  background-color: var(--bg-creme);
+  color: var(--text-main);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+.app-container {
+  width: 100vw;
+  height: 100vh;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+h1,
+h2,
+h3 {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  letter-spacing: -0.05em;
+  font-weight: 800;
+  text-shadow: 0.5px 0.5px 0px rgba(0, 0, 0, 0.05);
+}

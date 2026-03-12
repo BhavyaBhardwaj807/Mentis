@@ -1,0 +1,260 @@
+.landing-page {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background-color: #f5f5dc;
+    /* Beige */
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    /* Left aligned layout */
+    justify-content: center;
+    padding-left: 10%;
+
+    /* Enhanced Architectural Grid */
+    background-image:
+        linear-gradient(rgba(0, 0, 0, 0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 0, 0, 0.04) 1px, transparent 1px);
+    background-size: 60px 60px;
+}
+
+/* Film Grain Overlay */
+.landing-page::before {
+    content: "";
+    position: absolute;
+    top: -100%;
+    left: -100%;
+    width: 300%;
+    height: 300%;
+    background-image: url("https://grainy-gradients.vercel.app/noise.svg");
+    opacity: 0.15;
+    pointer-events: none;
+    z-index: 20;
+    animation: noise 0.2s infinite;
+}
+
+@keyframes noise {
+    0% {
+        transform: translate(0, 0)
+    }
+
+    10% {
+        transform: translate(-1%, -1%)
+    }
+
+    20% {
+        transform: translate(-2%, 1%)
+    }
+
+    33% {
+        transform: translate(1%, -1%)
+    }
+
+    50% {
+        transform: translate(-1%, 2%)
+    }
+
+    66% {
+        transform: translate(1%, 1%)
+    }
+
+    80% {
+        transform: translate(2%, -2%)
+    }
+
+    100% {
+        transform: translate(0, 1%)
+    }
+}
+
+.data-stamp {
+    position: absolute;
+    font-family: monospace;
+    font-size: 0.6rem;
+    color: rgba(0, 0, 0, 0.2);
+    pointer-events: none;
+    text-transform: uppercase;
+}
+
+.stamp-tl {
+    top: 2rem;
+    left: 2rem;
+}
+
+.stamp-br {
+    bottom: 2rem;
+    right: 2rem;
+    transform: rotate(-90deg);
+}
+
+.stamp-bl {
+    bottom: 2rem;
+    left: 2rem;
+}
+
+.vertical-line {
+    position: absolute;
+    left: 5%;
+    top: 0;
+    width: 1px;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.05);
+}
+
+.protocol-list {
+    position: absolute;
+    left: 2%;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    z-index: 5;
+}
+
+.protocol-step {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    opacity: 0.3;
+}
+
+.step-num {
+    font-family: monospace;
+    font-size: 0.6rem;
+    font-weight: 900;
+}
+
+.step-name {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 800;
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+}
+
+.hero-content {
+    position: relative;
+    z-index: 10;
+    text-align: left;
+    max-width: 50rem;
+}
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 0.8rem;
+    border-radius: 4px;
+    background: transparent;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+}
+
+.hero-title {
+    font-size: clamp(3rem, 8vw, 6rem);
+    font-weight: 900;
+    margin-bottom: 2rem;
+    color: #000000;
+    line-height: 0.95;
+    text-transform: uppercase;
+}
+
+.gradient-text {
+    /* No gradient in minimal theme */
+    color: #000000;
+    text-decoration: underline;
+    text-underline-offset: 8px;
+    text-decoration-thickness: 4px;
+}
+
+.hero-branding {
+    margin-bottom: 3rem;
+}
+
+.hero-punchline {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #111827;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    margin-bottom: 0.75rem;
+    display: block;
+    border-left: 4px solid #000;
+    padding-left: 1rem;
+}
+
+.hero-subtitle {
+    font-size: clamp(1rem, 1.5vw, 1.25rem);
+    color: #4b5563;
+    max-width: 32rem;
+    line-height: 1.5;
+    font-weight: 500;
+}
+
+.cta-group {
+    display: flex;
+    gap: 1.5rem;
+}
+
+.btn-primary {
+    padding: 1.2rem 2.5rem;
+    background: #000000;
+    color: #f5f5dc;
+    border-radius: 0px;
+    /* Sharp corners for minimal look */
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.btn-primary:hover {
+    background: #333333;
+}
+
+.btn-secondary {
+    padding: 1.2rem 2.5rem;
+    background: transparent;
+    color: #000000;
+    border: 1px solid #000000;
+    border-radius: 0px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.btn-secondary:hover {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4rem;
+    margin-top: 8rem;
+    width: 100%;
+    max-width: 60rem;
+}
+
+.feature-card {
+    text-align: left;
+}
+
+.feature-title {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: #000000;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+}
+
+.feature-desc {
+    color: #6b7280;
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
