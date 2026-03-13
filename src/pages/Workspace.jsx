@@ -1,9 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Mic, Video, Send, ArrowLeft, Layers, Square, User, LogOut, Trophy, Target, ZoomIn, ZoomOut, FileDown } from 'lucide-react';
+import { Mic, Video, Send, ArrowLeft, Layers, Square, User, LogOut, Trophy, Target, FileDown } from 'lucide-react';
 import jsPDF from 'jspdf';
 import { useThinkingPartner } from '../hooks/useThinkingPartner';
-import ThoughtNode from '../components/ThoughtNode';
+import StrategyCanvas from '../components/StrategyCanvas';
 import ChallengeHeader from '../components/ChallengeHeader';
 import IdeaArchive from '../components/IdeaArchive';
 import { supabase } from '../lib/supabase';
@@ -18,14 +18,8 @@ const Workspace = ({ onBack, user, onOpenProgress, selectedPathChallenge, onChal
     const [activeChallenge, setActiveChallenge] = useState(null);
     const [activePathMeta, setActivePathMeta] = useState(null);
     const [evaluation, setEvaluation] = useState(null);
-    const [canvasZoom, setCanvasZoom] = useState(1);
     const [isEvaluated, setIsEvaluated] = useState(false);
     const [isExporting, setIsExporting] = useState(false);
-    const [hoveredNodeId, setHoveredNodeId] = useState(null);
-
-    const MIN_ZOOM = 0.45;
-    const MAX_ZOOM = 1.8;
-    const CANVAS_SIZE = 3000;
 
     const topics = getTopicOptions();
     const levelLabel = activePathMeta?.levelTitle || 'Challenge Mode';
@@ -104,24 +98,6 @@ const Workspace = ({ onBack, user, onOpenProgress, selectedPathChallenge, onChal
     }, [selectedPathChallenge]);
 
     useEffect(() => {
-        const canvasEl = canvasRef.current;
-        if (!canvasEl) return;
-
-        const onWheel = (event) => {
-            if (!(event.ctrlKey || event.metaKey)) return;
-            event.preventDefault();
-            const delta = event.deltaY > 0 ? -0.06 : 0.06;
-            setCanvasZoom((prev) => {
-                const next = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, prev + delta));
-                return Number(next.toFixed(2));
-            });
-        };
-
-        canvasEl.addEventListener('wheel', onWheel, { passive: false });
-        return () => canvasEl.removeEventListener('wheel', onWheel);
-    }, [MIN_ZOOM, MAX_ZOOM]);
-
-    useEffect(() => {
         if (isEvaluated) setIsEvaluated(false);
     }, [graphData.nodes.length, graphData.edges.length]);
 
@@ -131,10 +107,6 @@ const Workspace = ({ onBack, user, onOpenProgress, selectedPathChallenge, onChal
         setInputText('');
         await manualInput(text);
     };
-
-    const handleZoomIn = () => setCanvasZoom((prev) => Math.min(MAX_ZOOM, Number((prev + 0.1).toFixed(2))));
-    const handleZoomOut = () => setCanvasZoom((prev) => Math.max(MIN_ZOOM, Number((prev - 0.1).toFixed(2))));
-    const handleZoomReset = () => setCanvasZoom(1);
 
     const startChallenge = () => {
         if (!activeChallenge) return;
@@ -368,76 +340,6 @@ const Workspace = ({ onBack, user, onOpenProgress, selectedPathChallenge, onChal
         }
     };
 
-    const calculatedPositions = React.useMemo(() => {
-        const positions = new Map();
-        const spacingX = 350;
-        const spacingY = 280;
-        const offsetX = 800;
-        const offsetY = 800;
-        const minCanvasX = 140;
-        const minCanvasY = 120;
-
-        const rootNodes = graphData.nodes.filter((n) => !graphData.edges.some((e) => e.target === n.id));
-        const nodesToProcess = [...graphData.nodes];
-        const processedNodeIds = new Set();
-
-        rootNodes.forEach((node, i) => {
-            if (node.id === 'initial_money') {
-                positions.set(node.id, { left: 1420, top: 1470 });
-                processedNodeIds.add(node.id);
-                return;
-            }
-
-            positions.set(node.id, {
-                left: Math.max(minCanvasX, offsetX + (i % 3) * (spacingX * 1.5)),
-                top: Math.max(minCanvasY, offsetY + Math.floor(i / 3) * spacingY)
-            });
-            processedNodeIds.add(node.id);
-        });
-
-        let changed = true;
-        let iterationCount = 0;
-        const maxIterations = graphData.nodes.length * 2;
-
-        while (changed && processedNodeIds.size < graphData.nodes.length && iterationCount < maxIterations) {
-            changed = false;
-            for (const node of nodesToProcess) {
-                if (processedNodeIds.has(node.id)) continue;
-
-                const edge = graphData.edges.find((e) => e.target === node.id);
-                const parentId = edge?.source;
-
-                if (parentId && positions.has(parentId)) {
-                    const parentPos = positions.get(parentId);
-                    const siblings = graphData.edges.filter((e) => e.source === parentId);
-                    const siblingIndex = siblings.findIndex((e) => e.target === node.id);
-
-                    const pos = {
-                        left: Math.max(minCanvasX, parentPos.left + (siblingIndex - (siblings.length - 1) / 2) * spacingX),
-                        top: Math.max(minCanvasY, parentPos.top + spacingY),
-                    };
-                    positions.set(node.id, pos);
-                    processedNodeIds.add(node.id);
-                    changed = true;
-                }
-            }
-            iterationCount++;
-        }
-
-        let gridIndex = 0;
-        graphData.nodes.forEach((node) => {
-            if (!positions.has(node.id)) {
-                positions.set(node.id, {
-                    left: Math.max(minCanvasX, offsetX + (gridIndex % 3) * (spacingX * 1.5)),
-                    top: Math.max(minCanvasY, offsetY + Math.floor(gridIndex / 3) * spacingY)
-                });
-                gridIndex++;
-            }
-        });
-
-        return positions;
-    }, [graphData.nodes, graphData.edges]);
-
     return (
         <div className="workspace-container">
             <div className="workspace-sidebar glass-panel">
@@ -531,17 +433,6 @@ const Workspace = ({ onBack, user, onOpenProgress, selectedPathChallenge, onChal
                         <h2>Financial Strategy Board</h2>
                     </div>
                     <div className="canvas-controls">
-                        <div className="zoom-controls">
-                            <button className="ctrl-btn zoom-btn" onClick={handleZoomOut} title="Zoom Out">
-                                <ZoomOut size={18} />
-                            </button>
-                            <button className="zoom-label" onClick={handleZoomReset} title="Reset Zoom (Ctrl/Cmd + Wheel to zoom)">
-                                {Math.round(canvasZoom * 100)}%
-                            </button>
-                            <button className="ctrl-btn zoom-btn" onClick={handleZoomIn} title="Zoom In">
-                                <ZoomIn size={18} />
-                            </button>
-                        </div>
                         <button
                             className={`ctrl-btn ${isListening ? 'active pulse-mic' : ''}`}
                             onClick={toggleListening}
@@ -563,99 +454,7 @@ const Workspace = ({ onBack, user, onOpenProgress, selectedPathChallenge, onChal
                     )}
 
                     {graphData.nodes.length > 0 && (
-                        <div className="zoom-space" style={{ width: `${CANVAS_SIZE * canvasZoom}px`, height: `${CANVAS_SIZE * canvasZoom}px` }}>
-                            <div
-                                className="zoom-content"
-                                style={{
-                                    transform: `scale(${canvasZoom})`,
-                                    transformOrigin: 'top left',
-                                    width: `${CANVAS_SIZE}px`,
-                                    height: `${CANVAS_SIZE}px`
-                                }}
-                            >
-                                <div className="nodes-container">
-                                    {graphData.edges.length > 0 && (
-                                        <svg
-                                            style={{
-                                                position: 'absolute',
-                                                width: '100%',
-                                                height: '100%',
-                                                top: 0,
-                                                left: 0,
-                                                pointerEvents: 'none',
-                                                zIndex: 1
-                                            }}
-                                        >
-                                            {graphData.edges.map((edge, edgeIndex) => {
-                                                const sourceNode = graphData.nodes.find((n) => n.id === edge.source);
-                                                const targetNode = graphData.nodes.find((n) => n.id === edge.target);
-                                                const sourcePos = calculatedPositions.get(edge.source);
-                                                const targetPos = calculatedPositions.get(edge.target);
-                                                if (!sourcePos || !targetPos || !sourceNode || !targetNode) return null;
-
-                                                const sourceWidth = sourceNode.importance === 'core' ? 160 : (sourceNode.importance === 'leaf' ? 100 : 120);
-                                                const targetWidth = targetNode.importance === 'core' ? 160 : (targetNode.importance === 'leaf' ? 100 : 120);
-
-                                                const startX = sourcePos.left + sourceWidth / 2;
-                                                const startY = sourcePos.top + (sourceNode.importance === 'core' ? 35 : 28);
-                                                const endX = targetPos.left + targetWidth / 2;
-                                                const endY = targetPos.top;
-
-                                                const isHighlighted = hoveredNodeId === edge.source || hoveredNodeId === edge.target;
-                                                const controlPointY = (startY + endY) / 2;
-                                                const pathData = `M ${startX} ${startY} C ${startX} ${controlPointY}, ${endX} ${controlPointY}, ${endX} ${endY}`;
-                                                const labelMidX = (startX + endX) / 2;
-                                                const labelMidY = (startY + endY) / 2;
-
-                                                return (
-                                                    <g key={`${edge.source}-${edge.target}-${edgeIndex}`}>
-                                                        <path
-                                                            d={pathData}
-                                                            fill="none"
-                                                            stroke="#000"
-                                                            strokeWidth={isHighlighted ? '1.5' : '1'}
-                                                            opacity={isHighlighted ? 0.3 : 0.08}
-                                                            style={{ transition: 'all 0.3s ease' }}
-                                                        />
-                                                        {edge.label && (
-                                                            <g>
-                                                                <text
-                                                                    x={labelMidX}
-                                                                    y={labelMidY - 5}
-                                                                    textAnchor="middle"
-                                                                    fill="#000"
-                                                                    fontSize="6"
-                                                                    fontWeight="800"
-                                                                    style={{
-                                                                        textTransform: 'uppercase',
-                                                                        letterSpacing: '0.1em',
-                                                                        pointerEvents: 'none',
-                                                                        opacity: isHighlighted ? 0.8 : 0.3
-                                                                    }}
-                                                                >
-                                                                    {edge.label}
-                                                                </text>
-                                                            </g>
-                                                        )}
-                                                    </g>
-                                                );
-                                            })}
-                                        </svg>
-                                    )}
-
-                                    {graphData.nodes.map((node, i) => (
-                                        <div
-                                            key={node.id}
-                                            onMouseEnter={() => setHoveredNodeId(node.id)}
-                                            onMouseLeave={() => setHoveredNodeId(null)}
-                                            style={{ position: 'absolute', zIndex: 10, ...calculatedPositions.get(node.id) }}
-                                        >
-                                            <ThoughtNode node={node} index={i} />
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
+                        <StrategyCanvas graphData={graphData} />
                     )}
                 </div>
             </div>

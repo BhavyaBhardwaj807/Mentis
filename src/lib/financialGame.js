@@ -70,6 +70,24 @@ const countKeywordHits = (text, list) =>
 const hasAny = (text, list) =>
     list.some((k) => text.includes(k));
 
+// Returns original-cased node labels that contain at least one keyword from the list
+const nodesMatchingKeywords = (nodes = [], keywordList = []) =>
+    nodes
+        .filter((n) => keywordList.some((k) => (n.label || '').toLowerCase().includes(k)))
+        .map((n) => n.label);
+
+// Formats an array of names into a readable list: "A, B, and C" or "A and B" or "A"
+const humanList = (items = []) => {
+    if (items.length === 0) return '';
+    if (items.length === 1) return items[0];
+    if (items.length === 2) return `${items[0]} and ${items[1]}`;
+    return `${items.slice(0, -1).join(', ')}, and ${items[items.length - 1]}`;
+};
+
+// Maps each category to a human-readable area name
+const CATEGORY_NAMES = ['safety instruments', 'growth investments', 'budgeting & planning', 'debt management'];
+const CATEGORY_KEYWORDS = [SAFE_KEYWORDS, GROWTH_KEYWORDS, PLANNING_KEYWORDS, DEBT_KEYWORDS];
+
 // ─── Factor 1 — Diversification (25 pts) ─────────────────────────────────────
 // How many of the 4 financial categories are represented on the canvas?
 const scoreDiversification = (text) => {
@@ -188,41 +206,70 @@ export function evaluateFinancialStrategy({ graphData, topicKey }) {
     const strengths    = [];
     const improvements = [];
 
-    // Diversification
-    if (fDiversification >= 75)
-        strengths.push('Strong diversification across multiple financial categories.');
-    else if (fDiversification >= 50)
-        improvements.push('Diversify further — try adding both safe instruments (FD, savings) and growth instruments (SIP, equity).');
-    else
-        improvements.push('Diversification is weak. Include concepts from at least 3 financial areas: safety, growth, and planning.');
+    // ── Diversification ──────────────────────────────────────────────────────────
+    {
+        const coveredCategories = CATEGORY_KEYWORDS
+            .map((kws, i) => (hasAny(text, kws) ? CATEGORY_NAMES[i] : null))
+            .filter(Boolean);
 
-    // Risk Balance
-    if (fRiskBalance >= 70)
-        strengths.push('Risk and safety are well balanced across your strategy.');
-    else if (fRiskBalance >= 40)
-        improvements.push('Improve risk balance — your strategy leans too heavily on one side. Add both safe and growth options.');
-    else
-        improvements.push('Risk balance is poor. Pair every growth instrument (stocks, SIP) with a safety instrument (FD, emergency fund).');
+        if (fDiversification >= 75)
+            strengths.push(`Strong diversification across ${humanList(coveredCategories)}.`);
+        else if (fDiversification >= 50) {
+            const missing = CATEGORY_NAMES.filter((n) => !coveredCategories.includes(n));
+            improvements.push(`Diversify further — your strategy covers ${humanList(coveredCategories)} but is missing ${humanList(missing)}.`);
+        } else
+            improvements.push('Diversification is weak. Include concepts from at least 3 financial areas: safety, growth, and planning.');
+    }
 
-    // Emergency Safety
-    if (fEmergencySafety === 100)
-        strengths.push('Emergency safety net is present — good financial hygiene.');
-    else
-        improvements.push('No emergency buffer detected. Add an Emergency Fund or Reserve node to protect your strategy.');
+    // ── Risk Balance ─────────────────────────────────────────────────────────────
+    {
+        const safeNodes   = nodesMatchingKeywords(strategyNodes, SAFE_KEYWORDS);
+        const growthNodes = nodesMatchingKeywords(strategyNodes, GROWTH_KEYWORDS);
 
-    // Timeline
-    if (fTimeline === 100)
-        strengths.push('Time horizons are referenced — your strategy has temporal structure.');
-    else
-        improvements.push('No timeline detected. Add short-term, long-term, or monthly goal nodes to give your plan a time dimension.');
+        if (fRiskBalance >= 70) {
+            const safePart   = safeNodes.length   ? `safety assets (${humanList(safeNodes)})`   : 'safety assets';
+            const growthPart = growthNodes.length ? `growth assets (${humanList(growthNodes)})` : 'growth assets';
+            strengths.push(`Your strategy balances ${safePart} with ${growthPart}.`);
+        } else if (fRiskBalance >= 40) {
+            if (safeNodes.length && !growthNodes.length)
+                improvements.push(`Risk balance is one-sided — you have ${humanList(safeNodes)} but no growth instruments like SIP or equity.`);
+            else if (growthNodes.length && !safeNodes.length)
+                improvements.push(`Risk balance is one-sided — you have ${humanList(growthNodes)} but no safety instruments like FD or emergency fund.`);
+            else
+                improvements.push('Improve risk balance — your strategy leans too heavily on one side. Add both safe and growth options.');
+        } else
+            improvements.push('Risk balance is poor. Pair every growth instrument (stocks, SIP) with a safety instrument (FD, emergency fund).');
+    }
 
-    // Complexity
-    if (fComplexity >= 70)
-        strengths.push('Strategy is well-structured with good node coverage and connections.');
-    else if (strategyNodes.length < 5)
-        improvements.push('Strategy is thin. Add more nodes and link them to show how decisions relate to outcomes.');
-    else
-        improvements.push('Connect your nodes more — edges between decisions and outcomes improve strategy clarity.');
+    // ── Emergency Safety ─────────────────────────────────────────────────────────
+    {
+        const emergencyNodes = nodesMatchingKeywords(strategyNodes, EMERGENCY_KEYWORDS);
+        if (fEmergencySafety === 100)
+            strengths.push(`Emergency safety net is covered by ${humanList(emergencyNodes)} — good financial hygiene.`);
+        else
+            improvements.push('No emergency buffer detected. Add an Emergency Fund or Reserve node to protect your strategy.');
+    }
+
+    // ── Timeline ─────────────────────────────────────────────────────────────────
+    {
+        const timelineNodes = nodesMatchingKeywords(strategyNodes, TIMELINE_KEYWORDS);
+        if (fTimeline === 100)
+            strengths.push(`Time horizons are defined through ${humanList(timelineNodes)}, giving your strategy a clear time dimension.`);
+        else
+            improvements.push('No timeline detected. Add short-term, long-term, or monthly goal nodes to give your plan a time dimension.');
+    }
+
+    // ── Complexity ───────────────────────────────────────────────────────────────
+    {
+        const nodeCount = strategyNodes.length;
+        const edgeCount = edges.length;
+        if (fComplexity >= 70)
+            strengths.push(`Your strategy contains ${nodeCount} nodes and ${edgeCount} connection${edgeCount !== 1 ? 's' : ''}, forming a clear planning structure.`);
+        else if (nodeCount < 5)
+            improvements.push('Strategy is thin. Add more nodes and link them to show how decisions relate to outcomes.');
+        else
+            improvements.push(`You have ${nodeCount} nodes but only ${edgeCount} connection${edgeCount !== 1 ? 's' : ''} — link more nodes to clarify how decisions relate to outcomes.`);
+    }
 
     // Topic penalty message
     if (penalty > 0) {

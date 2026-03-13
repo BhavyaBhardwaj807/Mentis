@@ -11,6 +11,89 @@
     --border-purple: #9c27b0;
 }
 
+.react-flow__handle {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.finance-node-box {
+    min-width: 180px;
+    padding: 10px 14px;
+    border-radius: 16px;
+    font-weight: 500;
+    border: 1px solid rgba(0, 0, 0, 0.18);
+    background: #fdfbf4;
+    color: #1f1f1f;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+    transition: transform 120ms ease, box-shadow 120ms ease, border-color 120ms ease, background-color 120ms ease;
+}
+
+.finance-node-content {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.finance-node-label {
+    display: block;
+}
+
+.finance-node-icon {
+    font-size: 0.9rem;
+    line-height: 1;
+    opacity: 0.85;
+}
+
+.finance-node-box:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 7px 15px rgba(0, 0, 0, 0.12);
+}
+
+.finance-node-box.shape-rounded {
+    border-radius: 16px;
+}
+
+.finance-node-box.shape-pill {
+    border-radius: 999px;
+}
+
+.finance-node-box.importance-core {
+    background: #f5ead0;
+    border-color: #94753a;
+}
+
+.finance-node-box.importance-normal {
+    background: #fdfbf4;
+    border-color: rgba(0, 0, 0, 0.18);
+}
+
+.finance-node-box.importance-leaf {
+    background: #ffffff;
+    border-style: dashed;
+}
+
+.finance-node-box.concept-risk {
+    border-color: #8a5b41;
+}
+
+.finance-node-box.concept-investment {
+    border-color: #3f6b4f;
+}
+
+.finance-node-box.concept-budget,
+.finance-node-box.concept-budgeting {
+    border-color: #2f5f80;
+}
+
+.finance-node-box.concept-savings,
+.finance-node-box.concept-saving {
+    border-color: #6a5a2f;
+}
+
+.finance-node-box.concept-debt {
+    border-color: #7a3f3f;
+}
+
 .workspace-container {
     display: grid;
     grid-template-columns: 240px 1fr 340px;
