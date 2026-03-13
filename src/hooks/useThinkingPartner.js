@@ -2,9 +2,27 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { startThinkingSession, sendThought } from '../lib/gemini';
 import { supabase } from '../lib/supabase';
 
-export function useThinkingPartner(user) {
+function buildMentorContext(context) {
+    if (!context?.enabled) return '';
+
+    return [
+        'Financial Mentor Mode: ACTIVE',
+        `Selected Topic: ${context.topicLabel || context.topicKey || 'General Finance'}`,
+        `Current Level: ${context.levelLabel || 'Beginner'}`,
+        `Challenge: ${context.challengePrompt || 'No active challenge yet.'}`,
+        'Mentor behavior rules:',
+        '- Ask one precise guiding question when needed.',
+        '- Keep suggestions practical and beginner-friendly.',
+        '- Map user ideas into finance strategy nodes and relationships.'
+    ].join('\n');
+}
+
+export function useThinkingPartner(user, mentorContext = null) {
     const [messages, setMessages] = useState([
-        { role: 'agent', content: "Hello! I'm your Thinking Partner. I'm here to help you structure your messy thoughts. Just start speaking!" }
+        {
+            role: 'agent',
+            content: "Welcome to Challenge Mode. I am your Financial Mentor. Share your strategy and I will help you structure and improve it on the canvas."
+        }
     ]);
     const [isListening, setIsListening] = useState(false);
     const [isThinking, setIsThinking] = useState(false);
@@ -16,6 +34,11 @@ export function useThinkingPartner(user) {
     const chatSessionRef = useRef(null);
     const recognitionRef = useRef(null);
     const synthesisRef = useRef(window.speechSynthesis);
+    const mentorContextRef = useRef(mentorContext);
+
+    useEffect(() => {
+        mentorContextRef.current = mentorContext;
+    }, [mentorContext]);
 
     // Initialize session
     useEffect(() => {
@@ -108,7 +131,11 @@ export function useThinkingPartner(user) {
         setIsThinking(true);
 
         try {
-            const response = await sendThought(chatSessionRef.current, text, graphData);
+            const contextPrefix = buildMentorContext(mentorContextRef.current);
+            const prompt = contextPrefix
+                ? `${contextPrefix}\n\nUser Strategy Input:\n${text}`
+                : text;
+            const response = await sendThought(chatSessionRef.current, prompt, graphData);
             setMessages(prev => [...prev, { role: 'agent', content: response.chat_response }]);
             speak(response.chat_response);
 
@@ -170,7 +197,11 @@ export function useThinkingPartner(user) {
         setMessages(prev => [...prev, { role: 'user', content: text }]);
         setIsThinking(true);
         try {
-            const response = await sendThought(chatSessionRef.current, text, graphData);
+            const contextPrefix = buildMentorContext(mentorContextRef.current);
+            const prompt = contextPrefix
+                ? `${contextPrefix}\n\nUser Strategy Input:\n${text}`
+                : text;
+            const response = await sendThought(chatSessionRef.current, prompt, graphData);
             setMessages(prev => [...prev, { role: 'agent', content: response.chat_response }]);
 
             if (response.graph_update) {
@@ -215,6 +246,11 @@ export function useThinkingPartner(user) {
             setIsThinking(false);
         }
     }, [graphData, chatSessionRef]);
+
+    const pushAgentMessage = useCallback((content) => {
+        if (!content) return;
+        setMessages(prev => [...prev, { role: 'agent', content }]);
+    }, []);
 
     // Setup Speech Recognition
     useEffect(() => {
@@ -273,6 +309,11 @@ export function useThinkingPartner(user) {
         setCurrentSessionId(null);
     }, []);
 
+    const initializeGraph = useCallback((nextGraph) => {
+        if (!nextGraph || !Array.isArray(nextGraph.nodes) || !Array.isArray(nextGraph.edges)) return;
+        setGraphData(nextGraph);
+    }, []);
+
     return {
         messages,
         isListening,
@@ -282,6 +323,8 @@ export function useThinkingPartner(user) {
         toggleListening,
         manualInput,
         loadSession,
-        newSession
+        newSession,
+        pushAgentMessage,
+        initializeGraph
     };
 }

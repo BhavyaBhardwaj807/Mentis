@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { supabase } from '../lib/supabase';
+import { isSupabaseConfigured, supabase } from '../lib/supabase';
 import { motion } from 'framer-motion';
 import { Mail, Lock, LogIn, UserPlus, X } from 'lucide-react';
 import './Auth.css';
@@ -21,6 +21,10 @@ const Auth = ({ isOpen, onClose, onAuthSuccess }) => {
         setError(null);
 
         try {
+            if (!isSupabaseConfigured) {
+                throw new Error('Supabase is not configured. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in .env, then restart the dev server.');
+            }
+
             if (isLogin) {
                 const { data, error } = await supabase.auth.signInWithPassword({
                     email,
@@ -37,7 +41,12 @@ const Auth = ({ isOpen, onClose, onAuthSuccess }) => {
                 setError("Signup successful! Check your email for verification.");
             }
         } catch (err) {
-            setError(err.message);
+            const message = err?.message || 'Authentication failed.';
+            if (message.toLowerCase().includes('failed to fetch')) {
+                setError('Could not reach Supabase. Verify VITE_SUPABASE_URL/VITE_SUPABASE_ANON_KEY, internet access, and CORS settings in your Supabase project.');
+            } else {
+                setError(message);
+            }
         } finally {
             setLoading(false);
         }

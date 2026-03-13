@@ -1,0 +1,60 @@
+.challenge-header-strip {
+    margin: 0 3rem 1rem 3rem;
+    padding: 1rem 1.25rem;
+    border-radius: 12px;
+    border: 1px solid rgba(0, 0, 0, 0.16);
+    background: linear-gradient(120deg, rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0.03));
+}
+
+.challenge-header-row {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.challenge-chip {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.62rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: 800;
+    padding: 0.28rem 0.45rem;
+    border-radius: 999px;
+    background: #101010;
+    color: #fff;
+}
+
+.challenge-chip.muted {
+    background: rgba(255, 255, 255, 0.65);
+    color: #000;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+}
+
+.challenge-header-strip h3 {
+    font-size: 0.84rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 0.35rem;
+}
+
+.challenge-header-strip p {
+    font-size: 0.76rem;
+    line-height: 1.5;
+    color: #2f2f2f;
+}
+
+.challenge-header-meta {
+    font-size: 0.62rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
+    margin-bottom: 0.4rem;
+    color: #3b3b3b;
+}
+
+@media (max-width: 820px) {
+    .challenge-header-strip {
+        margin: 0.75rem 1rem;
+    }
+}

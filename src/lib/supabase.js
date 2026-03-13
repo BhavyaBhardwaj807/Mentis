@@ -3,8 +3,31 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-if (!supabaseUrl || !supabaseAnonKey || supabaseUrl === 'YOUR_SUPABASE_URL') {
-    console.warn('Supabase credentials missing or using placeholders. Auth and Database features will be limited.');
+const looksLikePlaceholder = (value) => {
+    if (!value) return true;
+    const normalized = value.trim().toLowerCase();
+    return (
+        normalized.includes('your_') ||
+        normalized.includes('_here') ||
+        normalized.includes('placeholder')
+    );
+};
+
+const isValidSupabaseUrl = (value) => {
+    if (!value || looksLikePlaceholder(value)) return false;
+    try {
+        const url = new URL(value);
+        return url.protocol === 'https:';
+    } catch {
+        return false;
+    }
+};
+
+export const isSupabaseConfigured =
+    isValidSupabaseUrl(supabaseUrl) && !looksLikePlaceholder(supabaseAnonKey);
+
+if (!isSupabaseConfigured) {
+    console.warn('Supabase is not configured correctly. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in .env and restart Vite.');
 }
 
 export const supabase = createClient(

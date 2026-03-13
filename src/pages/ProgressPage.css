@@ -1,0 +1,379 @@
+.progress-page {
+    min-height: 100vh;
+    width: 100%;
+    padding: 2rem 3rem;
+    color: #111;
+    overflow-y: auto;
+}
+
+.treasure-map-theme {
+    background:
+        radial-gradient(circle at 18% 16%, rgba(119, 105, 62, 0.1), transparent 28%),
+        radial-gradient(circle at 82% 72%, rgba(193, 149, 83, 0.12), transparent 24%),
+        linear-gradient(180deg, #f6efd9 0%, #efe3c4 100%);
+    position: relative;
+}
+
+.treasure-map-theme::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background-image: radial-gradient(rgba(0, 0, 0, 0.07) 1px, transparent 1px);
+    background-size: 22px 22px;
+    opacity: 0.18;
+    pointer-events: none;
+}
+
+.progress-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    position: relative;
+    z-index: 2;
+}
+
+.map-title-block {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.progress-topbar h1 {
+    font-size: clamp(1.4rem, 2vw, 2rem);
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.map-title-block p {
+    font-size: 0.85rem;
+    color: #4f4a3f;
+}
+
+.progress-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    background: #fff;
+    padding: 0.45rem 0.7rem;
+    font-weight: 700;
+}
+
+.compass-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: 999px;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    background: rgba(255, 255, 255, 0.75);
+    font-size: 0.76rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.journey-canvas {
+    position: relative;
+    width: min(1200px, 100%);
+    height: 600px;
+    border: 1px solid rgba(74, 58, 29, 0.2);
+    border-radius: 18px;
+    background: rgba(255, 251, 240, 0.55);
+    backdrop-filter: blur(2px);
+    z-index: 2;
+    overflow: hidden;
+    margin: 0 auto 1rem auto;
+}
+
+.journey-route {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.journey-route path {
+    fill: none;
+    stroke: rgba(127, 103, 60, 0.5);
+    stroke-width: 1.1;
+    stroke-dasharray: 1.9 1.6;
+}
+
+.map-ship {
+    position: absolute;
+    z-index: 3;
+    font-size: 1.35rem;
+    filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.2));
+    animation: floatShip 2.8s ease-in-out infinite;
+}
+
+@keyframes floatShip {
+    0%,
+    100% {
+        transform: translateY(0px) rotate(-4deg);
+    }
+
+    50% {
+        transform: translateY(-4px) rotate(4deg);
+    }
+}
+
+.island-node {
+    position: absolute;
+    width: 250px;
+    padding: 0.7rem 0.8rem;
+    border: 1px solid rgba(79, 63, 31, 0.2);
+    border-radius: 14px;
+    background: #f8f2e4;
+    box-shadow: 0 7px 18px rgba(40, 29, 12, 0.07);
+    transform: translate(-50%, -50%);
+    text-align: left;
+    z-index: 2;
+}
+
+.island-node.locked {
+    opacity: 0.5;
+    filter: saturate(0.5);
+}
+
+.island-node.unlocked {
+    border-color: rgba(111, 91, 46, 0.45);
+    box-shadow: 0 9px 22px rgba(111, 91, 46, 0.16);
+}
+
+.island-node.completed {
+    border-color: rgba(32, 115, 78, 0.42);
+    background: #edf6ee;
+}
+
+.island-node.current {
+    border-width: 2px;
+    border-color: rgba(122, 81, 34, 0.62);
+}
+
+.island-node.focused {
+    outline: 2px solid rgba(122, 81, 34, 0.32);
+    outline-offset: 2px;
+}
+
+.node-title-row {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-bottom: 0.35rem;
+}
+
+.node-island {
+    font-size: 0.95rem;
+}
+
+.node-title {
+    font-size: 0.87rem;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+}
+
+.node-meta {
+    font-size: 0.72rem;
+    color: #585246;
+    font-weight: 700;
+    margin-bottom: 0.45rem;
+}
+
+.node-status-row {
+    display: flex;
+    gap: 0.35rem;
+}
+
+.mini-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: #cfc9b8;
+}
+
+.mini-dot.done {
+    background: #2f7a58;
+}
+
+.mini-dot.open {
+    background: #8b6e3d;
+}
+
+.mini-dot.lock {
+    background: #c6c1b4;
+}
+
+.island-detail-panel {
+    width: min(1200px, 100%);
+    margin: 0 auto;
+    border: 1px solid rgba(79, 63, 31, 0.2);
+    border-radius: 16px;
+    background: rgba(255, 252, 242, 0.86);
+    box-shadow: 0 8px 20px rgba(40, 29, 12, 0.07);
+    padding: 1rem;
+    position: relative;
+    z-index: 2;
+}
+
+.island-detail-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.4rem;
+}
+
+.island-detail-head h2 {
+    font-size: 1rem;
+    font-weight: 800;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.island-complete {
+    margin-left: 0.2rem;
+}
+
+.island-subhead {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: #555042;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.level-percent {
+    font-size: 0.82rem;
+    font-weight: 800;
+}
+
+.level-progress-track {
+    height: 10px;
+    border-radius: 999px;
+    background: rgba(102, 88, 59, 0.2);
+    overflow: hidden;
+    margin-bottom: 0.75rem;
+}
+
+.level-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #2f7a58, #3ea578);
+}
+
+.topic-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.6rem;
+}
+
+.topic-item {
+    border: 1px solid rgba(0, 0, 0, 0.14);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.72);
+    text-align: left;
+    padding: 0.65rem;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    column-gap: 0.5rem;
+    row-gap: 0.35rem;
+}
+
+.topic-item.done {
+    border-color: rgba(26, 107, 60, 0.45);
+    background: #eaf5ee;
+}
+
+.topic-item.locked {
+    cursor: not-allowed;
+    filter: grayscale(0.35);
+}
+
+.topic-icon {
+    font-size: 0.9rem;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    margin-top: 0.1rem;
+}
+
+.topic-label {
+    font-size: 0.85rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.topic-title {
+    grid-column: 1 / -1;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.72rem;
+    color: #444;
+}
+
+.progress-legend {
+    width: min(1200px, 100%);
+    margin: 1rem auto 0 auto;
+    display: flex;
+    gap: 1rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+    position: relative;
+    z-index: 2;
+}
+
+.progress-legend span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+@media (max-width: 920px) {
+    .progress-page {
+        padding: 1rem;
+    }
+
+    .progress-topbar {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .map-title-block {
+        align-items: flex-start;
+    }
+
+    .journey-canvas {
+        height: auto;
+        display: grid;
+        gap: 0.8rem;
+        padding: 0.9rem;
+    }
+
+    .journey-route,
+    .map-ship {
+        display: none;
+    }
+
+    .island-node {
+        position: relative;
+        left: auto !important;
+        top: auto !important;
+        transform: none;
+        width: 100%;
+    }
+
+    .topic-list {
+        grid-template-columns: 1fr;
+    }
+}

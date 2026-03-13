@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Brain, ArrowRight, Layers, Zap, Mic } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import Canvas3D from '../components/Canvas3D';
 import './LandingPage.css';
 
@@ -9,7 +9,7 @@ const LandingPage = ({ onEnter }) => {
         <div className="landing-page">
             <div className="vertical-line" />
             <div className="protocol-list">
-                {['Sensing', 'Capturing', 'Structural_Map', 'Neural_Link', 'Visual_Logic'].map((step, i) => (
+                {['Topic_Select', 'Challenge_Mode', 'Strategy_Map', 'Mentor_Coach', 'Score_Review'].map((step, i) => (
                     <div key={i} className="protocol-step">
                         <span className="step-num">PROT_{i + 1}</span>
                         <span className="step-name">{step}</span>
@@ -33,7 +33,7 @@ const LandingPage = ({ onEnter }) => {
                     <div className="badge">
                         <div className="status-dot active" style={{ width: 4, height: 4 }} />
                         <span style={{ fontSize: '0.65rem', fontWeight: 900, color: '#000', textTransform: 'uppercase', letterSpacing: '0.25em' }}>
-                            [ ESTABLISHING_NEURAL_LINK ]
+                            [ FINANCIAL_MENTOR_ONLINE ]
                         </span>
                     </div>
 
@@ -42,9 +42,9 @@ const LandingPage = ({ onEnter }) => {
                     </h1>
 
                     <div className="hero-branding">
-                        <p className="hero-punchline">Speak. Sketch. Structure.</p>
+                        <p className="hero-punchline">Play. Plan. Prosper.</p>
                         <p className="hero-subtitle">
-                            An architectural interface for raw thought. Sensing, mapping, and connecting your logic in real-time. Minimal. Brutalist. Precise.
+                            A gamified financial learning platform where you solve real money challenges on a visual strategy board with an AI mentor.
                         </p>
                     </div>
 
@@ -62,9 +62,9 @@ const LandingPage = ({ onEnter }) => {
                     transition={{ delay: 0.8, duration: 1, ease: "easeOut" }}
                 >
                     {[
-                        { title: "// Voice", desc: "Speak ideas into visual reality" },
-                        { title: "// Vision", desc: "Recognize sketches & logic" },
-                        { title: "// Structure", desc: "Automated relational mapping" }
+                        { title: "// Challenges", desc: "Solve budgeting, saving, and investing missions" },
+                        { title: "// Mentor", desc: "Get guided questions and tactical feedback" },
+                        { title: "// Progression", desc: "Level up through finance skill tracks" }
                     ].map((feature, i) => (
                         <div key={i} className="feature-card">
                             <h3 className="feature-title">{feature.title}</h3>
